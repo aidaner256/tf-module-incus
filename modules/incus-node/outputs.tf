@@ -1,5 +1,4 @@
-output "instance_ip" {
-  description = "IP-адреса созданных инстансов"
-  value       = var.ips
-  sensitive   = false
+output "hosts" {
+  description = "Имя ноды => IP"
+  value       = { for i, inst in incus_instance.this : inst.name => var.ips[i] }
 }

@@ -15,14 +15,9 @@ variable "init_user" {
   default     = "ansible"
 }
 
-variable "image_name" {
-  type    = string
-  default = "debian/12/cloud"
-}
-
-variable "image_remote" {
-  type    = string
-  default = "images"
+variable "image" {
+  description = "Образ: fingerprint (incus_image.x.fingerprint) или remote:alias"
+  type        = string
 }
 
 variable "disk" {
@@ -90,6 +85,7 @@ variable "tpm" {
   description = "Trusted Platform Module"
   default     = false
 }
+
 variable "shared_volume" {
   type = object({
     source   = string
@@ -105,7 +101,7 @@ variable "ram_mb" {
 }
 
 variable "disk_pool" {
-  type    = string
-  default = "default"
-
+  description = "Storage pool для root-диска"
+  type        = string
+  default     = "default"
 }
