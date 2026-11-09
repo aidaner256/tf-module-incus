@@ -9,6 +9,12 @@ variable "cpu" {
   default     = 1
 }
 
+variable "init_user" {
+  description = "Basic user to login after installation"
+  type        = string
+  default     = "ansible"
+}
+
 variable "image_name" {
   type    = string
   default = "debian/12/cloud"
@@ -24,11 +30,6 @@ variable "disk" {
   default = "10GiB"
 }
 
-variable "ram" {
-  type    = string
-  default = "1GiB"
-}
-
 variable "type" {
   description = "Can be container, or virtual-machine"
   type        = string
@@ -39,20 +40,72 @@ variable "ssh_pubkey" {
   type = string
 }
 
+variable "package_update" {
+  type    = bool
+  default = true
+}
+
+variable "packages_install" {
+  description = "Packages to install via cloud-init"
+  type        = list(string)
+  default     = []
+}
+
 variable "network" {
   type = string
 }
 
-variable "network_ip" {
-  type = string
-}
+variable "ips" {
+  description = "Static IPv4 per node, in order. Node count = length of this list."
+  type        = list(string)
 
-variable "count_nodes" {
-  type    = number
-  default = 1
+  validation {
+    condition     = length(var.ips) > 0
+    error_message = "ips must contain at least one address."
+  }
+
+  validation {
+    condition     = alltrue([for ip in var.ips : can(cidrhost("${ip}/32", 0))])
+    error_message = "Every entry in ips must be a plain IPv4 address, e.g. 10.10.10.11."
+  }
+
+  validation {
+    condition     = length(distinct(var.ips)) == length(var.ips)
+    error_message = "ips must not contain duplicates."
+  }
 }
 
 variable "power_state" {
-  type = bool
+  type    = bool
   default = true
+}
+
+variable "secureboot" {
+  type    = bool
+  default = true
+}
+
+variable "tpm" {
+  type        = bool
+  description = "Trusted Platform Module"
+  default     = false
+}
+variable "shared_volume" {
+  type = object({
+    source   = string
+    path     = string
+    readonly = optional(bool, true)
+  })
+  default = null
+}
+
+variable "ram_mb" {
+  type    = number
+  default = 1024
+}
+
+variable "disk_pool" {
+  type    = string
+  default = "default"
+
 }
