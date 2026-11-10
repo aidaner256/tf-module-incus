@@ -44,3 +44,5 @@ terraform.rc
 
 # Local secrets (MinIO creds for S3 backend)
 .env
+*.auto.tfvars
+*.secret.hcl

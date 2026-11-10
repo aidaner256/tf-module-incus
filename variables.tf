@@ -73,6 +73,24 @@ variable "shared_volume" {
   default = null
 }
 
+variable "incus_token" {
+  default   = ""
+  type      = string
+  sensitive = true
+}
+
+variable "incus_ip" {
+  default   = "127.0.0.1"
+  type      = string
+  sensitive = true
+}
+
+variable "incus_port" {
+  default   = "8443"
+  type      = string
+  sensitive = true
+}
+
 variable "nodes" {
   description = "Роли нод. IP задаются либо явным списком ips, либо диапазоном count + ip_start."
   type = map(object({

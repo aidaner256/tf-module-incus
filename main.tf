@@ -2,7 +2,7 @@ terraform {
   required_providers {
     incus = {
       source  = "lxc/incus"
-      version = "1.2.1"
+      version = "~> 1.2.1"
     }
   }
 
@@ -10,20 +10,25 @@ terraform {
     bucket                      = "tf-state"
     key                         = "states/terraform.tfstate"
     region                      = "us-east-1"
-    profile                     = "default"
     skip_credentials_validation = true
     skip_region_validation      = true
     skip_metadata_api_check     = true
     skip_requesting_account_id  = true
     use_path_style              = true
     use_lockfile                = true
-    endpoints = {
-      s3 = "http://localhost:9000"
-    }
   }
 }
 
-provider "incus" {}
+provider "incus" {
+  accept_remote_certificate    = true
+  default_remote               = "lab-tf-incus-module"
+  generate_client_certificates = true
+  remote {
+    name    = "lab-tf-incus-module"
+    address = "https://${var.incus_ip}:${var.incus_port}"
+    token   = var.incus_token
+  }
+}
 
 locals {
   gateway = cidrhost(var.subnet, 1)
