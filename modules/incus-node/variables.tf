@@ -105,3 +105,29 @@ variable "disk_pool" {
   type        = string
   default     = "default"
 }
+variable "project" {
+  description = "Incus-проект для профиля, инстансов, томов и снапшотов"
+  type        = string
+  default     = "default"
+}
+
+variable "acl" {
+  description = "Имя network ACL для eth0. null — без файрвола."
+  type        = string
+  default     = null
+}
+
+variable "data_volume" {
+  description = "Отдельный том под данные на каждую ноду. null — без тома."
+  type = object({
+    path = string
+    size = optional(string)
+  })
+  default = null
+}
+
+variable "snapshots" {
+  description = "Имена снапшотов, которые должны существовать у каждой ноды"
+  type        = list(string)
+  default     = []
+}

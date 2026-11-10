@@ -13,7 +13,8 @@ locals {
 }
 
 resource "incus_profile" "this" {
-  name = var.name
+  name    = var.name
+  project = var.project
 
   config = merge(
     {
@@ -51,9 +52,21 @@ resource "incus_profile" "this" {
   }
 }
 
+# Диск под данные: отдельный объект Incus, живёт независимо от VM
+resource "incus_storage_volume" "data" {
+  count = var.data_volume == null ? 0 : length(var.ips)
+
+  name         = "${var.name}-${count.index + 1}-data"
+  pool         = var.disk_pool
+  project      = var.project
+  content_type = "filesystem"
+  config       = var.data_volume.size == null ? {} : { size = var.data_volume.size }
+}
+
 resource "incus_instance" "this" {
   count    = length(var.ips)
   name     = "${var.name}-${count.index + 1}"
+  project  = var.project
   image    = var.image
   type     = var.type
   running  = var.power_state
@@ -63,9 +76,29 @@ resource "incus_instance" "this" {
   device {
     name = "eth0"
     type = "nic"
-    properties = {
-      network        = var.network
-      "ipv4.address" = var.ips[count.index]
+    properties = merge(
+      {
+        network        = var.network
+        "ipv4.address" = var.ips[count.index]
+      },
+      var.acl == null ? {} : {
+        "security.acls"                        = var.acl
+        "security.acls.default.ingress.action" = "reject"
+        "security.acls.default.egress.action"  = "allow"
+      }
+    )
+  }
+
+  dynamic "device" {
+    for_each = var.data_volume == null ? [] : [var.data_volume]
+    content {
+      name = "data"
+      type = "disk"
+      properties = {
+        pool   = var.disk_pool
+        source = incus_storage_volume.data[count.index].name
+        path   = device.value.path
+      }
     }
   }
 
@@ -85,4 +118,17 @@ resource "incus_instance" "this" {
       )
     }
   }
+}
+
+# Снапшот = пара (нода, имя). Ключ вида "k3s-worker-1/before-chaos"
+resource "incus_instance_snapshot" "this" {
+  for_each = {
+    for pair in setproduct(range(length(var.ips)), var.snapshots) :
+    "${var.name}-${pair[0] + 1}/${pair[1]}" => { idx = pair[0], name = pair[1] }
+  }
+
+  instance = incus_instance.this[each.value.idx].name
+  name     = each.value.name
+  project  = var.project
+  stateful = false
 }
