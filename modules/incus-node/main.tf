@@ -26,6 +26,9 @@ resource "incus_profile" "this" {
         ssh_key          = var.ssh_pubkey
         package_update   = var.package_update
         packages_install = var.packages_install
+        timezone         = var.timezone
+        runcmd           = var.runcmd
+        write_files      = var.write_files
       })
     },
     var.type == "virtual-machine" ? { "security.secureboot" = tostring(var.secureboot) } : {}
@@ -71,6 +74,7 @@ resource "incus_instance" "this" {
   type     = var.type
   running  = var.power_state
   profiles = [incus_profile.this.name]
+
 
   # NIC на инстансе, а не в профиле: у каждой ноды свой статический IP
   device {

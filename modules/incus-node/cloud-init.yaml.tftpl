@@ -6,7 +6,7 @@ users:
     ssh_authorized_keys:
       - ${ssh_key}
 package_update: ${package_update}
-packages:
-  %{ for package in packages_install ~}
-  - ${package}
-  %{ endfor ~}
+packages: ${jsonencode(packages_install)}
+runcmd: ${jsonencode(runcmd)}
+timezone: ${timezone}
+write_files: ${jsonencode(write_files)}

@@ -39,6 +39,11 @@ nodes = {
     disk           = "15GiB"
     packages       = ["curl"]
     package_update = true
+    runcmd         = ["apt update -y", "echo '123' > /tmp/123.txt", "modprobe overlay", "modprobe br_netfilter", "sysctl --system"]
+    write_files = [
+      { path = "/etc/sysctl.d/99-k3s.conf", content = "net.ipv4.ip_forward = 1\n" },
+      { path = "/tmp/123", owner = "ansible:ansible", defer = true, permissions = "0755", source = "files/k3s/test.conf" },
+    ]
     ingress = [
       { description = "k3s API, kubelet", from = ["k3s-worker"], protocol = "tcp", ports = "6443,10250" },
       { description = "flannel vxlan", from = ["k3s-worker"], protocol = "udp", ports = "8472" },
@@ -55,6 +60,10 @@ nodes = {
     disk           = "10GiB"
     packages       = ["nano"]
     package_update = false
+    runcmd         = ["modprobe overlay", "modprobe br_netfilter", "sysctl --system"]
+    write_files = [
+      { path = "/etc/sysctl.d/99-k3s.conf", source = "files/k3s/99-k3s-sysctl.conf" }
+    ]
     ingress = [
       { description = "kubelet", from = ["k3s-master"], protocol = "tcp", ports = "10250" },
       { description = "flannel vxlan", from = ["k3s-master"], protocol = "udp", ports = "8472" },

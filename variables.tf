@@ -102,6 +102,17 @@ variable "nodes" {
     disk           = string
     packages       = optional(list(string), [])
     package_update = optional(bool, true)
+    runcmd         = optional(list(string), [])
+    # Файлы через cloud-init write_files. source — путь от корня репо (files/...).
+    # defer = true: писать после создания пользователей (нужно для owner = init_user)
+    write_files = optional(list(object({
+      path        = string
+      source      = optional(string)
+      content     = optional(string)
+      permissions = optional(string, "0644")
+      owner       = optional(string, "root:root")
+      defer       = optional(bool, false)
+    })), [])
 
     # Отдельный диск под данные на каждую ноду роли. Переживает пересоздание VM.
     data_volume = optional(object({

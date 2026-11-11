@@ -173,6 +173,14 @@ module "node" {
   packages_install = each.value.packages
   package_update   = each.value.package_update
   data_volume      = each.value.data_volume
+  runcmd           = each.value.runcmd
+  write_files = [for f in each.value.write_files : {
+    path        = f.path
+    content     = f.content != null ? f.content : file("${path.root}/${f.source}")
+    permissions = f.permissions
+    owner       = f.owner
+    defer       = f.defer
+  }]
 
   # Общее для всех нод
   project       = incus_project.lab.name

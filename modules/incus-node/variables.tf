@@ -131,3 +131,25 @@ variable "snapshots" {
   type        = list(string)
   default     = []
 }
+
+variable "timezone" {
+  type    = string
+  default = "Etc/UTC"
+}
+
+variable "runcmd" {
+  type    = list(string)
+  default = []
+}
+
+variable "write_files" {
+  description = "cloud-init write_files: содержимое уже прочитано в корне"
+  type = list(object({
+    path        = string
+    content     = string
+    permissions = string
+    owner       = string
+    defer       = bool
+  }))
+  default = []
+}
