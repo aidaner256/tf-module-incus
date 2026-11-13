@@ -65,7 +65,7 @@ resource "incus_project" "lab" {
 
 # ---------- Сеть ----------
 resource "incus_network" "lab" {
-  name = "incusbr0"
+  name = "labbr0"
   config = {
     "ipv4.address"     = "${local.gateway}/${split("/", var.subnet)[1]}"
     "ipv4.nat"         = "true"

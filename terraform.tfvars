@@ -8,7 +8,7 @@ project = {
   }
 }
 
-subnet     = "10.10.10.0/24"
+subnet     = "10.10.100.0/24"
 dhcp_range = [200, 254]
 dns_domain = "lab"
 host_ip    = "192.168.1.242"
@@ -33,11 +33,11 @@ shared_volume = {
 nodes = {
   # явный список
   k3s-master = {
-    ips            = ["10.10.10.10"]
+    ips            = ["10.10.100.10"]
     cpu            = 2
     ram_mb         = 2048
     disk           = "15GiB"
-    packages       = ["curl"]
+    packages       = ["nano", "curl", "openssh-server"]
     package_update = true
     runcmd         = ["apt update -y", "echo '123' > /tmp/123.txt", "modprobe overlay", "modprobe br_netfilter", "sysctl --system"]
     write_files = [
@@ -47,6 +47,9 @@ nodes = {
     ingress = [
       { description = "k3s API, kubelet", from = ["k3s-worker"], protocol = "tcp", ports = "6443,10250" },
       { description = "flannel vxlan", from = ["k3s-worker"], protocol = "udp", ports = "8472" },
+      { description = "MetalLB speakers", from = ["k3s-worker"], protocol = "tcp", ports = "7946" },
+      { description = "MetalLB speakers", from = ["k3s-worker"], protocol = "udp", ports = "7946" },
+      { description = "ping from workers", from = ["k3s-worker"], protocol = "icmp4" },
       { description = "LAN via forward", cidrs = ["192.168.1.0/24"], protocol = "tcp", ports = "80,443,6443" },
     ]
   }
@@ -58,7 +61,7 @@ nodes = {
     cpu            = 1
     ram_mb         = 1024
     disk           = "10GiB"
-    packages       = ["nano"]
+    packages       = ["nano", "curl", "openssh-server"]
     package_update = false
     runcmd         = ["modprobe overlay", "modprobe br_netfilter", "sysctl --system"]
     write_files = [
@@ -67,6 +70,10 @@ nodes = {
     ingress = [
       { description = "kubelet", from = ["k3s-master"], protocol = "tcp", ports = "10250" },
       { description = "flannel vxlan", from = ["k3s-master"], protocol = "udp", ports = "8472" },
+      { description = "MetalLB speakers", from = ["k3s-master"], protocol = "tcp", ports = "7946" },
+      { description = "MetalLB speakers", from = ["k3s-master"], protocol = "udp", ports = "7946" },
+      { description = "ping from master", from = ["k3s-master"], protocol = "icmp4" },
+      { description = "LAN http/https", cidrs = ["192.168.1.0/24"], protocol = "tcp", ports = "80,443" },
     ]
   }
 
