@@ -3,7 +3,7 @@
 project = {
   name = "lab"
   limits = {
-    "limits.memory"    = "5GiB" # на хосте ~6.7 GiB, остаток — хосту и MinIO
+    "limits.memory"    = "10GiB" # на хосте 12Gb
     "limits.instances" = "8"
   }
 }
@@ -34,8 +34,8 @@ nodes = {
   # явный список
   k3s-master = {
     ips            = ["10.10.100.10"]
-    cpu            = 2
-    ram_mb         = 2048
+    cpu            = 4
+    ram_mb         = 3072
     disk           = "15GiB"
     packages       = ["nano", "curl", "openssh-server"]
     package_update = true
@@ -59,7 +59,7 @@ nodes = {
     count          = 3
     ip_start       = 20
     cpu            = 1
-    ram_mb         = 1024
+    ram_mb         = 2048
     disk           = "10GiB"
     packages       = ["nano", "curl", "openssh-server"]
     package_update = false
